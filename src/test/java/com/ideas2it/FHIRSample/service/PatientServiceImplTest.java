@@ -132,16 +132,16 @@ class PatientServiceImplTest {
 
     @Test
     void deletePatientTest() {
-        long patientId = 12345;
         MethodOutcome outcome = new MethodOutcome();
         outcome.setOperationOutcome(new OperationOutcome()
                 .setIssue(List.of(new OperationOutcome.OperationOutcomeIssueComponent()
                         .setDiagnostics("deleted"))));
         outcome.setStatusCode(200);
-        when(client.delete().resourceById(new IdType("Patient", patientId))
-                .execute()).thenReturn(outcome);
-        outcome = client.delete().resourceById(new IdType("Patient", patientId))
-                .execute();
-        assertEquals(200, outcome.getResponseStatusCode());
+        when(client.delete().resource(patient).execute()).thenReturn(outcome);
+        when(context.newRestfulGenericClient("http://hapi.fhir.org/baseR4")).thenReturn(client);
+        when(client.read().resource(Patient.class).withId(7777L).execute()).thenReturn(patient);
+        when(context.newJsonParser().encodeResourceToString(outcome.getOperationOutcome())).thenReturn("true");
+        var result = patientService.deletePatient(7777L);
+        assertEquals("true", result);
     }
 }
